@@ -62,7 +62,7 @@ A Docker solution that automatically manages CrowdSec AllowLists for Dynamic DNS
 #### 1. Clone and Setup
 
 ```bash
-git clone https://github.com/yourusername/crowdsec-ddns-monitor.git
+git clone https://github.com/trial123Zel/crowdsec-ddns-monitor.git
 cd crowdsec-ddns-monitor
 
 # Copy and edit configuration
