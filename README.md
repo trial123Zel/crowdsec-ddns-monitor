@@ -2,12 +2,9 @@
 
 A Docker solution that automatically manages CrowdSec AllowLists for Dynamic DNS domains and Cloudflare-proxied services. This eliminates the performance penalties of CrowdSec's native DNS resolution while providing intelligent change detection and updates.
 
-[!IMPORTANT]
-
-Claude Code planned and wrote 99% of this repo. I chose ease-of-setup vs. ultimate security. See Security Considerations and Important Deviations from Standard Deployments for details and do not deploy on production server/exposed services server without understanding the repercussions.
-
 ## ⚠️ Security Considerations
 
+- __Claude Code planned and wrote 99% of this repo. I chose ease-of-setup vs. ultimate security. See Security Considerations and Important Deviations from Standard Deployments for details and do not deploy on production server/exposed services server without understanding the repercussions.__
 - **Docker Socket Access**: The container requires Docker socket access. Ensure your host security policies allow this.
 - **Cloudflare Headers**: Never trust Cloudflare headers without validating the source IP is actually from Cloudflare.
 - **Webhook URLs**: Keep webhook URLs secure and rotate them regularly.
