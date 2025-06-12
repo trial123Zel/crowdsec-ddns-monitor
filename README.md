@@ -3,7 +3,8 @@
 A Docker solution that automatically manages CrowdSec AllowLists for Dynamic DNS domains and Cloudflare-proxied services. This eliminates the performance penalties of CrowdSec's native DNS resolution while providing intelligent change detection and updates.
 
 [!IMPORTANT]
-Claude Code planned and wrote 99% of this repo. I chose ease-of-setup vs. ultimate security. See Security Considerations and do not deploy on production server/exposed services server without understanding the repercussions.
+
+Claude Code planned and wrote 99% of this repo. I chose ease-of-setup vs. ultimate security. See Security Considerations and Important Deviations from Standard Deployments for details and do not deploy on production server/exposed services server without understanding the repercussions.
 
 ## ⚠️ Security Considerations
 
@@ -46,6 +47,8 @@ Claude Code planned and wrote 99% of this repo. I chose ease-of-setup vs. ultima
 
 </details>
 
+<details>
+
 ### 📋 Prerequisites
 
 - Docker and Docker Compose v2
@@ -54,6 +57,8 @@ Claude Code planned and wrote 99% of this repo. I chose ease-of-setup vs. ultima
 - (Optional) Cloudflare account for proxy features
 - Currently includes the now-deprecated Cloudflare Bouncer for Crowdsec. Consider upgrading to
   the new [Cloudflare Worker Bouncer by Crowdsec](https://docs.crowdsec.net/u/bouncers/cloudflare-workers)
+
+</details>
 
 ### 🚦 Quick Start
 
@@ -126,7 +131,11 @@ docker compose logs -f ddns-monitor | grep "DNS changes"
 
 *At least one of `DDNS_DOMAINS` or `CF_PROXIED_DOMAINS` must be specified.
 
+</details>
+
 ### Advanced Configuration
+
+<details>
 
 #### DNS Settings
 ```bash
@@ -166,8 +175,12 @@ ALERT_WEBHOOK_URL=https://your-webhook-url
 ```
 
 Each server runs independently but monitors the same domains, ensuring consistent protection.
+
 </details>
+
 ## 🔒 Cloudflare Integration
+
+<details>
 
 ### Why Not Whitelist All Cloudflare IPs?
 
@@ -178,6 +191,8 @@ Each server runs independently but monitors the same domains, ensuring consisten
 1. **Cloudflare Proxy IPs**: Managed in a separate allowlist for visibility
 2. **Header Validation**: Your application validates `CF-Connecting-IP` headers
 3. **Real IP Analysis**: CrowdSec analyzes the actual client IP, not the proxy IP
+
+</details>
 
 ### Application Integration
 
@@ -242,9 +257,13 @@ def home():
     client_ip = getattr(request, 'real_client_ip', request.remote_addr)
     return f"Your real IP is: {client_ip}"
 ```
+
 </details>
+
 ## 🎯 API Endpoints
+
 <details>
+
 The monitor exposes health and status endpoints:
 
 ### Health Check
@@ -280,6 +299,7 @@ curl -X POST http://localhost:8081/validate-cf-request \
     }
   }'
 ```
+
 </details>
 
 ## 📊 Monitoring and Alerting
@@ -305,9 +325,12 @@ Supported formats:
 - Slack webhooks
 - Discord webhooks
 - Generic HTTP POST endpoints
+
 </details>
 
 ## 🔍 Troubleshooting
+
+<details>
 
 ### Common Issues
 
@@ -321,6 +344,8 @@ LOG_LEVEL=DEBUG
 # Restart monitor
 docker compose restart ddns-monitor
 ```
+
+</details>
 
 ## 🚨 Important Deviations from Standard Deployments
 
@@ -383,6 +408,7 @@ git pull
 docker compose build ddns-monitor
 docker compose --env-file .env up -d
 ```
+
 </details>
 
 ## 🤝 Contributing
