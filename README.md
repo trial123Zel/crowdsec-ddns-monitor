@@ -48,9 +48,9 @@ A Docker solution that automatically manages CrowdSec AllowLists for Dynamic DNS
 
 <details>
 
-- Docker and Docker Compose v2
-- Dynamic DNS domains (from providers like DuckDNS, No-IP, etc.)
-- Basic understanding of CrowdSec concepts
+- Docker and Compose basics
+- One or more Dynamic DNS (DDNS) domains (from providers like DuckDNS, No-IP, etc.)
+- Basic understanding of CrowdSec concepts including config and Cloudflare Bouncer.
 - (Optional) Cloudflare account for proxy features
 - Currently includes the now-deprecated Cloudflare Bouncer for Crowdsec. Consider upgrading to
   the new [Cloudflare Worker Bouncer by Crowdsec](https://docs.crowdsec.net/u/bouncers/cloudflare-workers)
