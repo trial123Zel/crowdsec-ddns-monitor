@@ -44,9 +44,9 @@ A Docker solution that automatically manages CrowdSec AllowLists for Dynamic DNS
 
 </details>
 
-<details>
-
 ### 📋 Prerequisites
+
+<details>
 
 - Docker and Docker Compose v2
 - Dynamic DNS domains (from providers like DuckDNS, No-IP, etc.)
@@ -191,7 +191,7 @@ Each server runs independently but monitors the same domains, ensuring consisten
 
 </details>
 
-### Application Integration
+## Application Integration
 
 <details>
 
@@ -346,6 +346,8 @@ docker compose restart ddns-monitor
 
 ## 🚨 Important Deviations from Standard Deployments
 
+<details>
+
 ### Docker Socket Access
 This solution mounts the Docker socket (`/var/run/docker.sock`) to enable communication with CrowdSec. This is necessary for `cscli` command execution but requires:
 - Container runs with elevated privileges
@@ -363,6 +365,8 @@ This is NOT a standard CrowdSec pattern. The integration:
 - Does NOT blindly whitelist Cloudflare IPs
 - Requires application-level header validation
 - Provides IP ranges for reference, not blanket whitelisting
+
+</details>
 
 ## 🔄 Maintenance
 
