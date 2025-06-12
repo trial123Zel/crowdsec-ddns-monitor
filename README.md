@@ -2,6 +2,9 @@
 
 A Docker solution that automatically manages CrowdSec AllowLists for Dynamic DNS domains and Cloudflare-proxied services. This eliminates the performance penalties of CrowdSec's native DNS resolution while providing intelligent change detection and updates.
 
+[!IMPORTANT]
+Claude Code planned and wrote 99% of this repo. I chose ease-of-setup vs. ultimate security. See Security Considerations and do not deploy on production server/exposed services server without understanding the repercussions.
+
 ## ⚠️ Security Considerations
 
 - **Docker Socket Access**: The container requires Docker socket access. Ensure your host security policies allow this.
@@ -21,6 +24,8 @@ A Docker solution that automatically manages CrowdSec AllowLists for Dynamic DNS
 
 ## 🏗️ Architecture
 
+<details>
+
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   DDNS Monitor  │──▶│    CrowdSec     │───▶│   Your Apps     │
@@ -38,6 +43,8 @@ A Docker solution that automatically manages CrowdSec AllowLists for Dynamic DNS
 │ • Auto-Update   │    │ • Application   │
 └─────────────────┘    └─────────────────┘
 ```
+
+</details>
 
 ### 📋 Prerequisites
 
@@ -101,6 +108,8 @@ docker compose logs -f ddns-monitor | grep "DNS changes"
 
 ### ⚙️ Configuration
 
+<details>
+
 #### Environment Variables
 
 | Variable | Required | Default | Description |
@@ -132,8 +141,11 @@ DNS_RETRIES=3
 # Cloudflare IP range refresh (daily by default)
 CF_IP_REFRESH_INTERVAL=86400
 ```
+</details>
 
 ### 🔧 Multi-Server Deployment
+
+<details>
 
 For environments with multiple CrowdSec instances:
 
@@ -154,7 +166,7 @@ ALERT_WEBHOOK_URL=https://your-webhook-url
 ```
 
 Each server runs independently but monitors the same domains, ensuring consistent protection.
-
+</details>
 ## 🔒 Cloudflare Integration
 
 ### Why Not Whitelist All Cloudflare IPs?
@@ -168,6 +180,8 @@ Each server runs independently but monitors the same domains, ensuring consisten
 3. **Real IP Analysis**: CrowdSec analyzes the actual client IP, not the proxy IP
 
 ### Application Integration
+
+<details>
 
 For applications behind Cloudflare:
 
@@ -184,8 +198,53 @@ server {
 }
 ```
 
-## 🎯 API Endpoints
+For Python Application Code
+```python
+from flask import Flask, request
+import ipaddress
 
+app = Flask(__name__)
+
+# Initialize Cloudflare manager (from your monitor)
+cf_manager = CloudflareManager()
+
+@app.before_request
+def extract_real_client_ip():
+    """Extract and validate real client IP from Cloudflare headers"""
+    
+    # Get the source IP (Cloudflare proxy IP)
+    source_ip = request.environ.get('REMOTE_ADDR')
+    
+    # Check if this request came through Cloudflare
+    if cf_manager.is_cloudflare_ip(source_ip):
+        # Validate Cloudflare headers and get real client IP
+        real_ip = cf_manager.validate_cloudflare_headers(
+            dict(request.headers), 
+            source_ip
+        )
+        
+        if real_ip:
+            # Store real client IP for use by CrowdSec and your app
+            request.real_client_ip = real_ip
+            # Log for CrowdSec to analyze
+            app.logger.info(f"Real client IP: {real_ip} via CF proxy {source_ip}")
+        else:
+            # Invalid Cloudflare request - potential attack
+            app.logger.warning(f"Invalid CF headers from {source_ip}")
+            request.real_client_ip = source_ip
+    else:
+        # Direct connection (not through Cloudflare)
+        request.real_client_ip = source_ip
+
+@app.route('/')
+def home():
+    # Use the real client IP for any security decisions
+    client_ip = getattr(request, 'real_client_ip', request.remote_addr)
+    return f"Your real IP is: {client_ip}"
+```
+</details>
+## 🎯 API Endpoints
+<details>
 The monitor exposes health and status endpoints:
 
 ### Health Check
@@ -221,8 +280,11 @@ curl -X POST http://localhost:8081/validate-cf-request \
     }
   }'
 ```
+</details>
 
 ## 📊 Monitoring and Alerting
+
+<details>
 
 ### Health Monitoring
 
@@ -243,6 +305,7 @@ Supported formats:
 - Slack webhooks
 - Discord webhooks
 - Generic HTTP POST endpoints
+</details>
 
 ## 🔍 Troubleshooting
 
@@ -281,6 +344,8 @@ This is NOT a standard CrowdSec pattern. The integration:
 
 ## 🔄 Maintenance
 
+<details>
+
 ### Regular Tasks
 
 #### Update Cloudflare Ranges
@@ -318,6 +383,7 @@ git pull
 docker compose build ddns-monitor
 docker compose --env-file .env up -d
 ```
+</details>
 
 ## 🤝 Contributing
 
