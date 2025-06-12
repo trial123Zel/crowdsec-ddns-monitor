@@ -1,0 +1,77 @@
+services:
+  crowdsec:
+    image: docker.io/crowdsecurity/crowdsec:latest
+    container_name: crowdsec
+    environment:
+      - GID=1000   #Use your preferred group ID
+      - COLLECTIONS=''   #Add your preferred collections, space separated
+      - BOUNCER_KEY_CADDY=${CROWDSEC_API_KEY}   #For older Cloudflare Bouncer, not CF Worker Bouncer
+      - CUSTOM_HOSTNAME=${HOSTNAME:-crowdsec-host-homelab}
+    volumes:
+      - ./db:/var/lib/crowdsec/data/   #required
+      - ./config:/etc/crowdsec   #required
+#      - /var/log:/var/log/syslog:ro   #uncomment if you want Crowdsec to parse system logs
+    networks:
+      - crowdsec
+    ports:
+      - "127.0.0.1:8080:8080"   #Crowdsec LAPI port
+      - "127.0.0.1:6060:6060"   #Prometheus port for Crowdsec metrics
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges=true
+    healthcheck:   #optional
+      test: ["CMD", "cscli", "machines", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  cloudflare-bouncer:   #Old method, should update to Cloudflare Worker Bouncer in future
+    image: crowdsecurity/cloudflare-bouncer
+    container_name: cloudflare-bouncer
+    restart: unless-stopped
+    networks:
+      - crowdsec
+    ports:
+      - "2112:2112"
+    volumes:
+      - .//cfg_bouncer.yaml:/etc/crowdsec/bouncers/crowdsec-cloudflare-bouncer.yaml
+    depends_on:
+      crowdsec:
+        condition: service_healthy
+
+  ddns-monitor:
+    build: ./ddns-monitor
+    container_name: ddns-monitor
+    restart: unless-stopped
+    user: "0:999"   #Not good security, better ways to give container access to docker socket (docker exec commands)
+    environment:
+      - DDNS_DOMAINS=${DDNS_DOMAINS}   #required
+      - CHECK_INTERVAL=${CHECK_INTERVAL:-300}
+      - CROWDSEC_API_URL=http://crowdsec:8080
+      - ALLOWLIST_NAME=${ALLOWLIST_NAME:-ddns-whitelist}   #change whitelist name to anything
+      - CF_PROXIED_DOMAINS=${CF_PROXIED_DOMAINS:-}
+      - CF_ALLOWLIST_NAME=${CF_ALLOWLIST_NAME:-cloudflare-proxy}   #change whitelist name to anything
+      - CF_IP_REFRESH_INTERVAL=${CF_IP_REFRESH_INTERVAL:-86400}
+      - DNS_SERVERS=${DNS_SERVERS:-1.1.1.1,9.9.9.9,8.8.8.8}   #set preferred DNS resolvers
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - ALERT_WEBHOOK_URL=${ALERT_WEBHOOK_URL:-}   #optional
+    volumes:
+      - ./config:/etc/crowdsec:ro
+      - ./ddns-monitor-logs:/app/logs
+      - /var/run/docker.sock:/var/run/docker.sock   #Insecure, better options to expose docker socket
+    networks:
+      - crowdsec
+    depends_on:
+      crowdsec:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8081/health')"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+
+networks:   #Network settings can be adjusted as desired
+  crowdsec:
+    name: crowdsec_network
+    external: true

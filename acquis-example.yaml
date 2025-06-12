@@ -1,0 +1,9 @@
+filenames:
+  - /var/log/caddy/*.log
+labels:
+  type: caddy
+---
+filenames:
+  - /var/log/authelia/*.log
+labels:
+  type: authelia

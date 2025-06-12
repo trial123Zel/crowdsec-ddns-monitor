@@ -1,0 +1,21 @@
+your-cf-domain.com {
+    # Get real client IP from Cloudflare
+    @from_cloudflare {
+        remote_ip 103.21.244.0/22 103.22.200.0/22 # ... CF ranges
+    }
+    
+    # For Cloudflare traffic, trust CF-Connecting-IP header
+    handle @from_cloudflare {
+        reverse_proxy localhost:8080 {
+            header_up X-Real-IP {http.request.header.CF-Connecting-IP}
+            header_up X-Forwarded-For {http.request.header.CF-Connecting-IP}
+        }
+    }
+    
+    # For direct traffic, use actual remote IP
+    handle {
+        reverse_proxy localhost:8080 {
+            header_up X-Real-IP {http.request.remote.host}
+        }
+    }
+}
