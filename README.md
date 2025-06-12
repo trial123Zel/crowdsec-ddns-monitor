@@ -4,7 +4,7 @@ A Docker solution that automatically manages CrowdSec AllowLists for Dynamic DNS
 
 ## ⚠️ Security Considerations
 
-- __Claude Code planned and wrote 99% of this repo. I chose ease-of-setup vs. ultimate security. See Security Considerations and Important Deviations from Standard Deployments for details and do not deploy on production server/exposed services server without understanding the repercussions.__
+- __Claude Code planned and wrote 99% of this repo. I chose ease-of-setup vs. ultimate security. See [Security Considerations](https://github.com/trial123Zel/crowdsec-ddns-monitor#%EF%B8%8F-security-considerations) and [Important Deviations from Standard Deployments](https://github.com/trial123Zel/crowdsec-ddns-monitor?tab=readme-ov-file#-important-deviations-from-standard-deployments) for details and do not deploy on production server/exposed services server without understanding the repercussions.__
 - **Docker Socket Access**: The container requires Docker socket access. Ensure your host security policies allow this.
 - **Cloudflare Headers**: Never trust Cloudflare headers without validating the source IP is actually from Cloudflare.
 - **Webhook URLs**: Keep webhook URLs secure and rotate them regularly.
