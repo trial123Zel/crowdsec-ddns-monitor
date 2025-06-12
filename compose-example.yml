@@ -35,7 +35,7 @@ services:
     ports:
       - "2112:2112"
     volumes:
-      - .//cfg_bouncer.yaml:/etc/crowdsec/bouncers/crowdsec-cloudflare-bouncer.yaml
+      - ./cfg_bouncer.yaml:/etc/crowdsec/bouncers/crowdsec-cloudflare-bouncer.yaml
     depends_on:
       crowdsec:
         condition: service_healthy
